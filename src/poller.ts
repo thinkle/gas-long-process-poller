@@ -1,6 +1,6 @@
 import { getPropertyName } from "./names";
 import { ProcessUpdate, Action, Status } from "./status";
-import { isInterrupted } from "./updater";
+import { isInterruptedFlexible } from "./updater";
 export class InterruptError extends Error {
   constructor(message: string) {
     super(message);
@@ -13,8 +13,11 @@ export class InterruptError extends Error {
  * Updates the process status in the properties service.
  * @param {ProcessUpdate} update - The update object containing the process information.
  */
-export function updateProcess(update: ProcessUpdate) {
-  const props = PropertiesService.getUserProperties();
+export function updateProcess(
+  update: ProcessUpdate,
+  propertiesService = PropertiesService
+) {
+  const props = propertiesService.getUserProperties();
   try {
     const updateJson = JSON.stringify(update);
     props.setProperty(getPropertyName(update.func, "status"), updateJson);
@@ -30,13 +33,18 @@ export function updateProcess(update: ProcessUpdate) {
 export class ProcessUpdater {
   public processUpdate: ProcessUpdate;
   public currentAction?: Action;
-
+  private propertiesService: GoogleAppsScript.Properties.PropertiesService;
   /**
    * Creates an instance of Updater.
    * @param {string} fname - The function name associated with this process.
    * @param {Partial<ProcessUpdate>} init - Initial values to set up the process update.
    */
-  constructor(fname: string, init: Partial<ProcessUpdate> = {}) {
+  constructor(
+    fname: string,
+    init: Partial<ProcessUpdate> = {},
+    propertiesService = PropertiesService
+  ) {
+    this.propertiesService = propertiesService;
     this.processUpdate = {
       func: fname,
       status: init.status ?? "unknown",
@@ -85,7 +93,9 @@ export class ProcessUpdater {
    * Checks for an interruption and throws an InterruptError if one has occurred.
    */
   checkInterrupt() {
-    if (isInterrupted(this.processUpdate.func)) {
+    if (
+      isInterruptedFlexible(this.processUpdate.func, this.propertiesService)
+    ) {
       this.processUpdate.status = "interrupted";
       if (this.currentAction) {
         this.currentAction.status = "interrupted";
@@ -101,6 +111,6 @@ export class ProcessUpdater {
    */
   doUpdate() {
     this.checkInterrupt();
-    updateProcess(this.processUpdate);
+    updateProcess(this.processUpdate, this.propertiesService);
   }
 }

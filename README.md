@@ -19,6 +19,7 @@ function showUpdateInYourUI (processUpdate) {
 On the Apps Script side, you have two APIs available. The full-service model looks like this:
 
 ```js
+import {ProcessUpdater} from 'gas-long-process-poller';
 let updater = new ProcessUpdater({
   func : 'myFunctionName',
   name : 'My User Facing Description',  
@@ -33,7 +34,7 @@ try {
     ACTION
   })
 } catch (err) {
-  
+  // Handle interruption
 }
 ```
 
@@ -60,3 +61,28 @@ try {
   // handle user interrupt error
 }
 ```
+
+## Mocks
+
+We provide a convenient mock library for import in testing libraries if you want to test your front-end code outside of a GoogleAppsScript environment.
+
+```javascript
+import {ProcessUpdater} from 'gas-long-process-poller/dist/mocks';
+let updater = new ProcessUpdater({
+  func : 'myFunctionName',
+  name : 'My User Facing Description',  
+})
+
+// We can now use the ProcessUpdater API in just the same way we would
+// otherwise.
+```
+
+To access this same code on your "front end" you'll need your mock google
+apps script API to use our other mocks...
+```javascript
+// Mock API...
+export {getFunctionStatus, interruptFunction} from 'mocks';
+```
+
+This is quite handy if you're using a package like:
+[google-apps-script-run-ts-mocks](https://www.npmjs.com/package/google-apps-script-run-ts-mocks).

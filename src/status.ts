@@ -1,3 +1,11 @@
+export type SafeScriptType =
+  | boolean
+  | null
+  | number
+  | string
+  | SafeScriptType[]
+  | { [key: string]: SafeScriptType };
+
 export type Status =
   | "unknown"
   | "queued"
@@ -21,6 +29,7 @@ export type ProcessUpdate = {
   status: Status;
   error?: string;
   actions: Action[];
+  metadata?: SafeScriptType;
 };
 export type ProcessUpdatePartial = {
   func?: string;
@@ -39,4 +48,5 @@ export type Action = {
   startTime?: number;
   endTime?: number;
   status?: Status;
+  metadata?: SafeScriptType;
 };

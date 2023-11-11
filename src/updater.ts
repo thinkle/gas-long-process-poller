@@ -1,8 +1,11 @@
 import { getPropertyName } from "./names";
 import { ProcessUpdate, UNKNOWN_STATUS } from "./status";
 
-export function getFunctionStatus(fname: string): ProcessUpdate {
-  let props = PropertiesService.getUserProperties();
+export function getFunctionStatusFlexible(
+  fname: string,
+  propertiesService = PropertiesService
+): ProcessUpdate {
+  let props = propertiesService.getUserProperties();
   let prop = props.getProperty(getPropertyName(fname, "status"));
   if (prop) {
     return JSON.parse(prop);
@@ -10,14 +13,30 @@ export function getFunctionStatus(fname: string): ProcessUpdate {
     return { ...UNKNOWN_STATUS, func: fname };
   }
 }
+export function getFunctionStatus(fname: string): ProcessUpdate {
+  return getFunctionStatusFlexible(fname, PropertiesService);
+}
 
 export function isInterrupted(fname: string) {
-  let props = PropertiesService.getUserProperties();
+  return isInterruptedFlexible(fname, PropertiesService);
+}
+export function isInterruptedFlexible(
+  fname: string,
+  propertiesService = PropertiesService
+) {
+  let props = propertiesService.getUserProperties();
   let prop = props.getProperty(getPropertyName(fname, "interrupt"));
   return prop === "true";
 }
 
-export function interruptFunction(fname: string) {
-  let props = PropertiesService.getUserProperties();
+export function interruptFunctionFlexible(
+  fname: string,
+  propertiesService = PropertiesService
+) {
+  let props = propertiesService.getUserProperties();
   props.setProperty(getPropertyName(fname, "interrupt"), "true");
+}
+
+export function interruptFunction(fname: string) {
+  return interruptFunctionFlexible(fname, PropertiesService);
 }
